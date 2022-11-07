@@ -19,6 +19,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run(){
     try{
         const eventCollection = client.db('bdVolunteer').collection('events');
+        const donateCollection = client.db('bdVolunteer').collection('donates');
 
         app.get('/events' , async(req , res)=>{
             const page = parseInt(req.query.page);
@@ -36,6 +37,28 @@ async function run(){
             const query = {_id: ObjectId(id)}
             const event = await eventCollection.findOne(query)
             res.send(event)
+        })
+
+
+        app.get('/donates' , async(req , res)=>{
+            const query = {}
+            const cursor = donateCollection.find(query);
+            const donates = await cursor.toArray();
+            res.send(donates);
+        
+        })
+
+        app.post('/donates' , async(req , res)=>{
+            const donate = req.body;
+            const result = await donateCollection.insertOne(donate);
+            res.send(result)
+        })
+
+        app.delete('/donates/:id' , async(req , res)=>{
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)}
+            const result = await donateCollection.deleteOne(query);
+            res.send(result)
         })
     }
     finally{
